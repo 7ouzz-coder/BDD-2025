@@ -484,3 +484,44 @@ WHERE EXTRACT(YEAR FROM s.ses_fecha) = 2025
   AND (pcon.fecha_termino IS NULL OR pcon.fecha_termino >= s.ses_fecha)
 GROUP BY co.cons_descripcion, s.ses_codigo
 ORDER BY s.ses_codigo;
+
+-- Q4: Vista y Consejero con Mayor Asistencia 2025
+
+CREATE OR REPLACE VIEW vista_asistencia_2025 AS
+SELECT 
+    c.con_rut,
+    c.con_nombre,
+    c.con_apellido,
+    e.esta_descripcion AS estamento,
+    co.cons_descripcion AS consejo,
+    COUNT(DISTINCT s.ses_codigo) AS sesiones_totales,
+    COUNT(DISTINCT ac.ses_codigo) AS sesiones_asistidas,
+    ROUND(
+        (COUNT(DISTINCT ac.ses_codigo)::NUMERIC / 
+         NULLIF(COUNT(DISTINCT s.ses_codigo), 0)) * 100, 
+        2
+    ) AS porcentaje_asistencia
+FROM consejero c
+JOIN pertenece_consejo pc ON c.con_rut = pc.con_rut
+JOIN consejo co ON pc.cons_codigo = co.cons_codigo
+JOIN estamento e ON c.esta_codigo = e.esta_codigo
+CROSS JOIN sesion s
+LEFT JOIN asiste_c ac ON c.con_rut = ac.con_rut AND s.ses_codigo = ac.ses_codigo
+WHERE pc.fecha_termino IS NULL
+  AND EXTRACT(YEAR FROM s.ses_fecha) = 2025
+  AND EXTRACT(MONTH FROM s.ses_fecha) BETWEEN 1 AND 11
+GROUP BY c.con_rut, c.con_nombre, c.con_apellido, e.esta_descripcion, co.cons_descripcion;
+
+-- Consulta del consejero con mayor asistencia
+SELECT 
+    con_nombre,
+    con_apellido,
+    estamento,
+    porcentaje_asistencia
+FROM vista_asistencia_2025
+WHERE porcentaje_asistencia = (
+    SELECT MAX(porcentaje_asistencia)
+    FROM vista_asistencia_2025
+);
+-- FIN CONSULTAS
+-- Integrantes: Guillermo Villar, Victor Flores, Arline Mitchel.

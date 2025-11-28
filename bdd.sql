@@ -435,3 +435,25 @@ JOIN consejo cons ON pc.cons_codigo = cons.cons_codigo
 WHERE (pc.fecha_termino IS NULL OR pc.fecha_termino >= CURRENT_DATE)
   AND (f.fac_descripcion = 'Fac. Ciencias Empresariales'
        OR (f.fac_descripcion = 'Fac. Ingeniería' AND esp.esp_descripcion = 'Ciencias de Datos'));
+
+-- Q2: Consejeros del Consejo Universitario sin asistencia en Septiembre y Octubre 2025 a sesiones sin temas resolutivos
+
+SELECT DISTINCT c.con_nombre, c.con_apellido
+FROM consejero c
+INNER JOIN pertenece_consejo pc ON c.con_rut = pc.con_rut
+INNER JOIN consejo co ON pc.cons_codigo = co.cons_codigo
+WHERE co.cons_descripcion = 'Consejo Universitario'
+  AND (pc.fecha_termino IS NULL OR pc.fecha_termino >= CURRENT_DATE)
+  AND c.con_rut NOT IN (
+      SELECT ac.con_rut
+      FROM asiste_c ac
+      INNER JOIN sesion s ON ac.ses_codigo = s.ses_codigo
+      WHERE EXTRACT(YEAR FROM s.ses_fecha) = 2025
+        AND EXTRACT(MONTH FROM s.ses_fecha) IN (9, 10)
+        AND s.ses_codigo NOT IN (
+            SELECT t.ses_codigo
+            FROM tema t
+            INNER JOIN propone p ON t.tem_codigo = p.tem_codigo
+            WHERE t.tem_tipo = 'Resolutivo'
+        )
+  );

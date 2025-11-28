@@ -270,7 +270,9 @@ INSERT INTO consejero VALUES
 ('44444444-4', 'Ana', 'Muñoz', '987451236', 'F', 'EST02'),
 ('55555555-6', 'Luis', 'Hernández', '912345987', 'M', 'EST01'),
 ('99999999-9', 'Roberto', 'Fuentes', '956781234', 'M', 'EST01'),
-('88888888-9', 'Carla', 'Vidal', '945612789', 'F', 'EST01');
+('88888888-9', 'Carla', 'Vidal', '945612789', 'F', 'EST01'),
+('66666666-6', 'Carlos', 'Soto', '956123456', 'M', 'EST03'),
+('77777777-7', 'María', 'Silva', '945678912', 'F', 'EST03');
 
 INSERT INTO programa_academico VALUES
 ('PA01', 'Ingeniería Informática', 'Pregrado', 'SED01'),
@@ -419,11 +421,11 @@ INSERT INTO vota VALUES
 -- Q1: Consejeros Académicos en Facultades Específicas
 
 SELECT 
-c.con_nombre, 
-c.con_apellido, 
-e.esta_descripcion, 
-d.dep_descripcion, 
-cons.cons_descripcion
+    c.con_nombre, 
+    c.con_apellido, 
+    e.esta_descripcion, 
+    d.dep_descripcion, 
+    cons.cons_descripcion
 FROM consejero c
 JOIN estamento e ON c.esta_codigo = e.esta_codigo
 JOIN academico a ON c.con_rut = a.con_rut
@@ -432,9 +434,9 @@ JOIN facultad f ON d.fac_codigo = f.fac_codigo
 JOIN especializacion esp ON a.esp_codigo = esp.esp_codigo
 JOIN pertenece_consejo pc ON c.con_rut = pc.con_rut
 JOIN consejo cons ON pc.cons_codigo = cons.cons_codigo
-WHERE (pc.fecha_termino IS NULL OR pc.fecha_termino >= CURRENT_DATE)
-  AND (f.fac_descripcion = 'Fac. Ciencias Empresariales'
-       OR (f.fac_descripcion = 'Fac. Ingeniería' AND esp.esp_descripcion = 'Ciencias de Datos'));
+WHERE pc.fecha_termino IS NULL
+  AND esp.esp_descripcion = 'Ciencias de Datos'
+  AND f.fac_descripcion IN ('Fac. Ciencias Empresariales', 'Fac. Ingeniería');
 
 -- Q2: Consejeros del Consejo Universitario sin asistencia en Septiembre y Octubre 2025 a sesiones sin temas resolutivos
 

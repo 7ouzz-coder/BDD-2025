@@ -457,3 +457,30 @@ WHERE co.cons_descripcion = 'Consejo Universitario'
             WHERE t.tem_tipo = 'Resolutivo'
         )
   );
+
+-- Q3: Resumen Sesiones 2025
+
+SELECT 
+    co.cons_descripcion AS Consejo,
+    s.ses_codigo AS Codigo_Sesion,
+    COUNT(DISTINCT t.tem_codigo) AS Numero_Temas,
+    COUNT(DISTINCT CASE 
+        WHEN u.con_rut IS NOT NULL AND DATE(u.fecha) = DATE(s.ses_fecha) 
+        THEN ac.con_rut 
+    END) AS Consejeros_Con_Vehiculo,
+    COUNT(DISTINCT CASE 
+        WHEN u.con_rut IS NULL OR DATE(u.fecha) != DATE(s.ses_fecha)
+        THEN ac.con_rut 
+    END) AS Consejeros_Sin_Vehiculo
+FROM sesion s
+JOIN tema t ON s.ses_codigo = t.ses_codigo
+JOIN propone_c pc ON t.tem_codigo = pc.tem_codigo
+JOIN asiste_c ac ON s.ses_codigo = ac.ses_codigo
+JOIN pertenece_consejo pcon ON ac.con_rut = pcon.con_rut
+JOIN consejo co ON pcon.cons_codigo = co.cons_codigo
+LEFT JOIN usa u ON ac.con_rut = u.con_rut AND DATE(u.fecha) = DATE(s.ses_fecha)
+WHERE EXTRACT(YEAR FROM s.ses_fecha) = 2025
+  AND EXTRACT(MONTH FROM s.ses_fecha) BETWEEN 1 AND 11
+  AND (pcon.fecha_termino IS NULL OR pcon.fecha_termino >= s.ses_fecha)
+GROUP BY co.cons_descripcion, s.ses_codigo
+ORDER BY s.ses_codigo;

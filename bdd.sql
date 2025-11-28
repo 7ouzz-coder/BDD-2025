@@ -414,3 +414,24 @@ INSERT INTO vota VALUES
 ('ACU02', '44444444-4', 'En Contra'),
 ('ACU03', '55555555-6', 'A Favor');
 -- FIN INSERT DE DATOS
+
+-- CONSULTAS
+-- Q1: Consejeros Académicos en Facultades Específicas
+
+SELECT 
+c.con_nombre, 
+c.con_apellido, 
+e.esta_descripcion, 
+d.dep_descripcion, 
+cons.cons_descripcion
+FROM consejero c
+JOIN estamento e ON c.esta_codigo = e.esta_codigo
+JOIN academico a ON c.con_rut = a.con_rut
+JOIN departamento d ON a.dep_codigo = d.dep_codigo
+JOIN facultad f ON d.fac_codigo = f.fac_codigo
+JOIN especializacion esp ON a.esp_codigo = esp.esp_codigo
+JOIN pertenece_consejo pc ON c.con_rut = pc.con_rut
+JOIN consejo cons ON pc.cons_codigo = cons.cons_codigo
+WHERE (pc.fecha_termino IS NULL OR pc.fecha_termino >= CURRENT_DATE)
+  AND (f.fac_descripcion = 'Fac. Ciencias Empresariales'
+       OR (f.fac_descripcion = 'Fac. Ingeniería' AND esp.esp_descripcion = 'Ciencias de Datos'));

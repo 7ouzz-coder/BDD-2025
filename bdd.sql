@@ -77,12 +77,12 @@ CREATE TABLE departamento(
 );
 CREATE TABLE participa(
 		com_codigo VARCHAR(20),
-		com_rut VARCHAR(12),
+		con_rut VARCHAR(12),
 		fecha_inicio DATE,
 		fecha_fin DATE,
-		PRIMARY KEY (com_codigo,com_rut),
+		PRIMARY KEY (com_codigo,con_rut),
 		FOREIGN KEY (com_codigo) REFERENCES comision(com_codigo),
-		FOREIGN KEY (com_rut) REFERENCES consejero(com_rut)
+		FOREIGN KEY (con_rut) REFERENCES consejero(con_rut)
 );
 CREATE TABLE academico(
 		con_rut VARCHAR(12) PRIMARY KEY,
